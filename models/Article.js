@@ -34,7 +34,7 @@ const articleSchema = new mongoose.Schema(
       ref: "User",
     },
     coverImage: {
-      type: Buffer,
+      type: String,
       default: "https://static.productionready.io/images/smiley-cyrus.jpg",
     },
     favouritesCount: {

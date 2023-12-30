@@ -2,17 +2,15 @@ const Article = require("../models/Article");
 const base58 = require("base58");
 const User = require("../models/User");
 const asyncHandler = require("express-async-handler");
-const multer = require("multer");
-const upload = multer();
+
 const createArticle = asyncHandler(async (req, res) => {
   const id = req.userId;
 
   const author = await User.findById(id).exec();
   const { title, description, body, tagList } = JSON.parse(req.body.article);
-  const image = req.file.buffer;
-  //  const base58Data = base58.encode(Buffer.from(base64Data, "base64"));
-  // image = `data:${contentType};base58,${base58Data}`;
-  // console.log(image);
+  const imageUrl = req.file.path;
+
+  console.log(imageUrl);
 
   if (!title || !description || !body) {
     res.status(400).json({ message: "All fields are required" });
@@ -22,7 +20,7 @@ const createArticle = asyncHandler(async (req, res) => {
     title,
     description,
     body,
-    coverImage: image,
+    coverImage: imageUrl,
   });
 
   article.author = id;

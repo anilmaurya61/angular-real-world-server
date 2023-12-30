@@ -3,8 +3,8 @@ const router = express.Router();
 const verifyJWT = require("../middleware/verifyJWT");
 const verifyJWTOptional = require("../middleware/verifyJWTOptional");
 const articleController = require("../controllers/articlesController");
-const multer = require("multer");
-const upload = multer();
+const parser = require("../config/cloudinary");
+
 // feed endpoint must go before :slug endpoint
 router.get("/feed", verifyJWT, articleController.feedArticles);
 
@@ -15,7 +15,7 @@ router.get("/:slug", articleController.getArticleWithSlug);
 router.post(
   "/",
   verifyJWT,
-  upload.single("image"),
+  parser.single("image"),
   articleController.createArticle
 );
 
