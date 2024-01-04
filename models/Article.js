@@ -35,7 +35,7 @@ const articleSchema = new mongoose.Schema(
     },
     coverImage: {
       type: String,
-      default: "https://static.productionready.io/images/smiley-cyrus.jpg",
+      // default: "https://static.productionready.io/images/smiley-cyrus.jpg",
     },
     favouritesCount: {
       type: Number,

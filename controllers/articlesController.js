@@ -7,41 +7,66 @@ const createArticle = asyncHandler(async (req, res) => {
   const id = req.userId;
 
   const author = await User.findById(id).exec();
-  const { title, description, body, tagList } = JSON.parse(req.body.article);
-  const imageUrl = req.file.path;
 
-  console.log(imageUrl);
+  const articleData = typeof req.body.article === 'object' ? req.body.article : JSON.parse(req.body.article);
+
+  const { title, description, body, tagList, coverImage } = articleData;
+
 
   if (!title || !description || !body) {
     res.status(400).json({ message: "All fields are required" });
   }
 
-  const article = await Article.create({
-    title,
-    description,
-    body,
-    coverImage: imageUrl,
-  });
+  // Check if the article already exists by title
+  const existingArticle = await Article.findOne({ title }).exec();
 
-  article.author = id;
+  if (existingArticle) {
+    // Update the existing article
+    existingArticle.title = title;
+    existingArticle.description = description;
+    existingArticle.body = body;
+    existingArticle.coverImage = coverImage;
+    
+    if (Array.isArray(tagList) && tagList.length > 0) {
+      existingArticle.tagList = tagList;
+    }
 
-  if (Array.isArray(tagList) && tagList.length > 0) {
-    article.tagList = tagList;
+    await existingArticle.save();
+
+    return res.status(200).json({
+      article: await existingArticle.toArticleResponse(author),
+      updated: true,
+    });
+  } else {
+    // Create a new article
+    const article = await Article.create({
+      title,
+      description,
+      body,
+      coverImage: coverImage,
+    });
+
+    article.author = id;
+
+    if (Array.isArray(tagList) && tagList.length > 0) {
+      article.tagList = tagList;
+    }
+
+    await article.save();
+
+    return res.status(200).json({
+      article: await article.toArticleResponse(author),
+      updated: false,
+    });
   }
-
-  await article.save();
-
-  return await res.status(200).json({
-    article: await article.toArticleResponse(author),
-  });
 });
+
+
 
 const deleteArticle = asyncHandler(async (req, res) => {
   const id = req.userId;
 
   const { slug } = req.params;
-
-  // console.log(id);
 
   const loginUser = await User.findById(id).exec();
 
